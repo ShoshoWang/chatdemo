@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+  <head>
+    <title>chat demo</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no" >
+    <meta name="version" content="0.0.20151012.1">
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.2/css/bootstrap.min.css" type="text/css">
+    <style type="text/css">
+      body{
+        background: #edeff0;
+        color: #777777;
+      }
+      /*底部样式*/
+      form{
+        margin-top: 10px;
+      }
+      #chat-pop{
+        position: relative;
+        max-width: 40%;
+        min-width: 40px;
+        padding: 10px;
+        font-size: 14px;
+        color: #fff;
+        background: #A0E75A;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        -webkit-border-radius: 4px;
+        margin-left:10px; 
+      }
+      #chat-pop:before{
+        content: " ";
+        display: inline-block;
+        -webkit-transform: rotate(-145deg);
+        -ms-transform: rotate(-145deg);
+        transform: rotate(-145deg);
+        height: 12px;
+        width: 12px;
+        border-width: 1px ;
+        border-color: #A0E75A;
+        border-style: solid;
+        position: absolute;
+        top: 14px;
+        left: -5px;
+        background: #A0E75A;
+      }
+      #message{
+        height: 350px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- 聊天室导航 -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+         <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">聊天</a>
+          </div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Link<span class="sr-only">(current)</span></a></li>
+              <li><a href="#">Link</a></li>
+            </ul>
+          </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <!-- 页面聊天内容 -->
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="panel">
+              <div class="panel-body">
+                <h5 class="text-info text-center">欢迎来到代码的世界</h5>
+                <hr/>
+                <!-- 编译模版消息 -->
+                <div id="message">
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--页面底部  --> 
+      <nav class=" navbar-fixed-bottom" style="background:#1aba9c">
+        <div class="container-fluid">
+          <div class="row">
+            <!-- 输入消息框 -->
+            <div class="col-md-12 col-sm-12 col-xs-12">
+              <form>
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="m" placeholder="来吧随便说">
+                  </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.2/js/bootstrap.min.js" ></script>
+    <script src="http://cdn.bootcss.com/handlebars.js/3.0.3/handlebars.min.js"></script>
+    <!-- 模版 -->
+    <script id="message-templ" type="text/x-handlebars-template">
+       <div class="media">
+          <div class="row">
+             <!--头像-->
+            <div class="col-md-2 col-sm-2 col-xs-2">
+              <div class="media-left">
+                <a href="#">
+                  <img class="media-object img-circle img-responsive" src="http://ww2.sinaimg.cn/crop.0.0.1080.1080.1024/d773ebfajw8eum57eobkwj20u00u075w.jpg" alt="头像">
+                </a>
+              </div>
+            </div>
+            <!--消息-->
+            <div class="col-md-10 col-sm-10 col-xs-10">
+              <div class="media-body">
+                <h5 class="media-heading">cayley</h5>
+                <div id="chat-pop">
+                  {{msg}}
+                </div>  
+              </div>
+            </div>
+          </div>
+      </div> 
+    </script>
+    <script>
+      var socket = io({transports:["websocket"]});
+      $('form').submit(function(){
+
+        var msg=$.trim($('#m').val());
+        var now= new Date();
+            socket.emit('chat message', {
+                message:msg
+            });
+        $('#m').val('');
+        return false;
+      });
+      socket.on('chat message', function(msg){
+          // 获取模板中定义的HTML结构
+          var source = $("#message-templ").html();
+          // 编译HTML生成对应的JS模板
+          var template = Handlebars.compile(source);
+          // 使用JS模板处理需要显示的JSON数据, 生成对应的HTML内容
+          var html = template(msg);
+          $('#message').append(html);
+      });
+    </script>
+  </body>
+</html>
